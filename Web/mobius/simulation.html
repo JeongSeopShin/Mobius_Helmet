@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>가상 작업자</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+
+    <!-- jquery -->
+      <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+
+      <!-- 모비우스 -->
+      <script src="./mobi-hero-mobius.js"></script>
+
+    <style>
+      p.state {
+        font-size: large;
+        font-weight: bold;
+      }
+      input{
+        display: inline-block;
+      }
+    </style>
+
+
+    <script>
+      $(document).ready(function() {
+
+        $('#btn1').click(function(){
+          if($('#btn1').text() == 'Go to work'){
+            $('#btn1').removeClass('btn-secondary');
+		        $('#btn1').addClass('btn-primary');
+            $('#btn1').text('Off work');
+
+            createCin('worker1', 'location', "A1");
+
+            getWorker1();
+            startWorker1();
+          }
+          else if($('#btn1').text() == 'Off work'){
+            $('#btn1').removeClass('btn-primary');
+		        $('#btn1').addClass('btn-secondary');
+            $('#btn1').text('Go to work');
+
+            // 임의로 처음 Go to work할 때만 Location 바뀌게 해놓음
+            createCin('worker1', 'location', "En");
+
+            stopWorker1();
+          }
+          else{ }
+        });
+
+        $('#btn2').click(function(){
+          if($('#btn2').text() == 'Go to work'){
+            $('#btn2').removeClass('btn-secondary');
+		        $('#btn2').addClass('btn-primary');
+            $('#btn2').text('Off work');
+
+            createCin('worker2', 'location', "A2");
+
+            getWorker2();
+            startWorker2();
+          }
+          else if($('#btn2').text() == 'Off work'){
+            $('#btn2').removeClass('btn-primary');
+		        $('#btn2').addClass('btn-secondary');
+            $('#btn2').text('Go to work');
+
+            // 임의로 처음 Go to work할 때만 Location 바뀌게 해놓음
+            createCin('worker2', 'location', "En");
+
+            stopWorker2();
+          }
+          else{ }
+        });
+
+        $('#btn3').click(function(){
+          if($('#btn3').text() == 'Go to work'){
+            $('#btn3').removeClass('btn-secondary');
+		        $('#btn3').addClass('btn-primary');
+            $('#btn3').text('Off work');
+
+            createCin('worker3', 'location', "A1");
+
+            getWorker3();
+            startWorker3();
+          }
+          else if($('#btn3').text() == 'Off work'){
+            $('#btn3').removeClass('btn-primary');
+		        $('#btn3').addClass('btn-secondary');
+            $('#btn3').text('Go to work');
+
+            // 임의로 처음 Go to work할 때만 Location 바뀌게 해놓음
+            createCin('worker3', 'location', "En");
+
+            stopWorker3();
+          }
+          else{ }
+        });
+
+        $('#btn4').click(function(){
+          if($('#btn4').text() == 'Go to work'){
+            $('#btn4').removeClass('btn-secondary');
+		        $('#btn4').addClass('btn-primary');
+            $('#btn4').text('Off work');
+
+            createCin('worker4', 'location', "A2");
+
+            getWorker4();
+            startWorker4();
+          }
+          else if($('#btn4').text() == 'Off work'){
+            $('#btn4').removeClass('btn-primary');
+		        $('#btn4').addClass('btn-secondary');
+            $('#btn4').text('Go to work');
+
+            // 임의로 처음 Go to work할 때만 Location 바뀌게 해놓음
+            createCin('worker4', 'location', "En");
+
+            stopWorker4();
+          }
+          else{ }
+        });
+
+
+      });
+
+      // 랜덤 값 생성 함수
+      function createRandomNumber(min, max){
+        let randNum = Math.floor(Math.random()*(max-min+1)) + min;
+        return randNum;
+      }
+
+      // 작업자 랜덤 데이터 생성
+      function createRandomWorkerDate() {
+        let arr = ['A1', 'A2', 'A3', 'A4'];       // Off work할 때 location에 En 값 보내야 함
+        let idx = createRandomNumber(0, 3);
+        let location = arr[idx];
+        let temperature = createRandomNumber(15, 50);
+        let humidity = createRandomNumber(10, 70);
+        let methane = createRandomNumber(1, 50);
+        let cmonoxide = createRandomNumber(1, 50);
+        let heartrate = createRandomNumber(70, 90);
+        let danger = createRandomNumber(0, 10) < 10 ? 0 : 'fall';
+        let state;
+        if (temperature > 49 || humidity > 69 || methane > 49 || cmonoxide > 49 || heartrate < 71 || danger=='fall') {
+          state = 'danger';
+        }
+        else{
+          state = 0;
+        }
+
+        let list = {
+          "temperature" : temperature,
+          "humidity" : humidity,
+          "methane" : methane,
+          "cmonoxide" : cmonoxide,
+          "heartrate" : heartrate,
+          "location" : location,
+          "danger" : danger,
+          "state" : state
+        };
+        return list;
+      }
+    </script>
+
+    <!-- 작업자1 관련 -->
+    <script>
+      startWorker1 = function() {
+        playWorker1 = setInterval(function() {
+          getWorker1();
+        }, 3000);
+      };
+
+      stopWorker1 = function() {
+        enterWorker1();
+        clearInterval(playWorker1);
+      };
+
+      // 작업자1 Go to work : 랜덤값 생성하여 주기적으로 모비우스에 보냄
+      function getWorker1(){
+        let data = createRandomWorkerDate();
+        console.log(data);
+        $('#input1_loc').val("A1");
+        $('#input1_heart').val(data["heartrate"]);
+        $('#input1_danger').val(data["danger"]);
+        $('#input1_temp').val(data["temperature"]);
+        $('#input1_humi').val(data["humidity"]);
+        $('#input1_meth').val(data["methane"]);
+        $('#input1_cmon').val(data["cmonoxide"]);
+
+        if(data["state"] == 0){
+          $('#input1_state').text("SAFE");
+          $('#input1_state').css("color","black");
+        }
+        else{
+          $('#input1_state').text("DANGER");
+          $('#input1_state').css("color","red");
+        }
+
+        //createCin('worker1', 'location', data["location"]);
+        createCin('worker1', 'heartrate', data["heartrate"]);
+        createCin('worker1', 'temperature', data["temperature"]);
+        createCin('worker1', 'humidity', data["humidity"]);
+        createCin('worker1', 'methane', data["methane"]);
+        createCin('worker1', 'cmonoxide', data["cmonoxide"]);
+        createCin('worker1', 'danger', data["danger"]);
+      }
+
+
+      // 작업자1 Off work
+      function enterWorker1(){
+        $('#input1_loc').val("En");
+        $('#input1_heart').val('');
+        $('#input1_danger').val('');
+        $('#input1_temp').val('');
+        $('#input1_humi').val('');
+        $('#input1_meth').val('');
+        $('#input1_cmon').val('');
+
+        $('#input1_state').text("-");
+        $('#input1_state').css("color","black");
+      }
+    </script>
+
+    <!-- 작업자2 관련 -->
+    <script>
+      startWorker2 = function() {
+        playWorker2 = setInterval(function() {
+          getWorker2();
+        }, 3000);
+      };
+
+      stopWorker2 = function() {
+        enterWorker2();
+        clearInterval(playWorker2);
+      };
+
+      // 작업자2 Go to work : 랜덤값 생성하여 주기적으로 모비우스에 보냄
+      function getWorker2(){
+        let data = createRandomWorkerDate();
+        console.log(data);
+        $('#input2_loc').val("A2");
+        $('#input2_heart').val(data["heartrate"]);
+        $('#input2_danger').val(data["danger"]);
+        $('#input2_temp').val(data["temperature"]);
+        $('#input2_humi').val(data["humidity"]);
+        $('#input2_meth').val(data["methane"]);
+        $('#input2_cmon').val(data["cmonoxide"]);
+
+        if(data["state"] == 0){
+          $('#input2_state').text("SAFE");
+          $('#input2_state').css("color","black");
+        }
+        else{
+          $('#input2_state').text("DANGER");
+          $('#input2_state').css("color","red");
+        }
+
+        // createCin('worker2', 'location', data["location"]);
+        createCin('worker2', 'heartrate', data["heartrate"]);
+        createCin('worker2', 'temperature', data["temperature"]);
+        createCin('worker2', 'humidity', data["humidity"]);
+        createCin('worker2', 'methane', data["methane"]);
+        createCin('worker2', 'cmonoxide', data["cmonoxide"]);
+        createCin('worker2', 'danger', data["danger"]);
+      }
+
+
+      // 작업자2 Off work
+      function enterWorker2(){
+        $('#input2_loc').val("En");
+        $('#input2_heart').val('');
+        $('#input2_danger').val('');
+        $('#input2_temp').val('');
+        $('#input2_humi').val('');
+        $('#input2_meth').val('');
+        $('#input2_cmon').val('');
+
+        $('#input2_state').text("-");
+        $('#input2_state').css("color","black");
+      }
+    </script>
+
+
+<!-- 작업자3 관련 -->
+<script>
+  startWorker3 = function() {
+    playWorker3 = setInterval(function() {
+      getWorker3();
+    }, 3000);
+  };
+
+  stopWorker3 = function() {
+    enterWorker3();
+    clearInterval(playWorker3);
+  };
+
+  // 작업자3 Go to work : 랜덤값 생성하여 주기적으로 모비우스에 보냄
+  function getWorker3(){
+    let data = createRandomWorkerDate();
+    console.log(data);
+    $('#input3_loc').val("A4");
+    $('#input3_heart').val(data["heartrate"]);
+    $('#input3_danger').val(data["danger"]);
+    $('#input3_temp').val(data["temperature"]);
+    $('#input3_humi').val(data["humidity"]);
+    $('#input3_meth').val(data["methane"]);
+    $('#input3_cmon').val(data["cmonoxide"]);
+
+    if(data["state"] == 0){
+      $('#input3_state').text("SAFE");
+      $('#input3_state').css("color","black");
+    }
+    else{
+      $('#input3_state').text("DANGER");
+      $('#input3_state').css("color","red");
+    }
+
+    // createCin('worker3', 'location', data["location"]);
+    createCin('worker3', 'heartrate', data["heartrate"]);
+    createCin('worker3', 'temperature', data["temperature"]);
+    createCin('worker3', 'humidity', data["humidity"]);
+    createCin('worker3', 'methane', data["methane"]);
+    createCin('worker3', 'cmonoxide', data["cmonoxide"]);
+    createCin('worker3', 'danger', data["danger"]);
+  }
+
+
+  // 작업자3 Off work
+  function enterWorker3(){
+    $('#input3_loc').val("En");
+    $('#input3_heart').val('');
+    $('#input3_danger').val('');
+    $('#input3_temp').val('');
+    $('#input3_humi').val('');
+    $('#input3_meth').val('');
+    $('#input3_cmon').val('');
+
+    $('#input3_state').text("-");
+    $('#input3_state').css("color","black");
+  }
+</script>
+
+<!-- 작업자4 관련 -->
+<script>
+  startWorker4 = function() {
+    playWorker4 = setInterval(function() {
+      getWorker4();
+    }, 3000);
+  };
+
+  stopWorker4 = function() {
+    enterWorker4();
+    clearInterval(playWorker4);
+  };
+
+  // 작업자4 Go to work : 랜덤값 생성하여 주기적으로 모비우스에 보냄
+  function getWorker4(){
+    let data = createRandomWorkerDate();
+    console.log(data);
+    $('#input4_loc').val("A2");
+    $('#input4_heart').val(data["heartrate"]);
+    $('#input4_danger').val(data["danger"]);
+    $('#input4_temp').val(data["temperature"]);
+    $('#input4_humi').val(data["humidity"]);
+    $('#input4_meth').val(data["methane"]);
+    $('#input4_cmon').val(data["cmonoxide"]);
+
+    if(data["state"] == 0){
+      $('#input4_state').text("SAFE");
+      $('#input4_state').css("color","black");
+    }
+    else{
+      $('#input4_state').text("DANGER");
+      $('#input4_state').css("color","red");
+    }
+
+    // createCin('worker4', 'location', data["location"]);
+    createCin('worker4', 'heartrate', data["heartrate"]);
+    createCin('worker4', 'temperature', data["temperature"]);
+    createCin('worker4', 'humidity', data["humidity"]);
+    createCin('worker4', 'methane', data["methane"]);
+    createCin('worker4', 'cmonoxide', data["cmonoxide"]);
+    createCin('worker4', 'danger', data["danger"]);
+  }
+
+
+  // 작업자4 Off work
+  function enterWorker4(){
+    $('#input4_loc').val("En");
+    $('#input4_heart').val('');
+    $('#input4_danger').val('');
+    $('#input4_temp').val('');
+    $('#input4_humi').val('');
+    $('#input4_meth').val('');
+    $('#input4_cmon').val('');
+
+    $('#input4_state').text("-");
+    $('#input4_state').css("color","black");
+  }
+</script>
+  </head>
+  <body>
+    <br>
+
+    <div class="container">
+
+        <div class="row">
+
+            <div class="col-3">
+              <div class="card">
+                  <div class="card-header">
+                    worker1
+                    <button id="btn1" class="btn btn-secondary btn-sm"  style="float: right">Go to work</button>
+                  </div>
+                  <img src="img/worker2.png"alt="" />
+                  <div class="card-body">
+                  <table style="margin: 10px 0px; width: 100%; text-align: center;">
+                    <tbody>
+                      <tr>
+                        <td><label for="input1_loc" class="form-label">Location</label></td>
+                        <td><input type="text" class="form-control form-control-sm" id="input1_loc" placeholder="" style="width: 100px;" value="En"></td>
+                      </tr>
+                      <tr>
+                        <td><label for="input1_heart" class="form-label">Heart Rate</label></td>
+                        <td><input type="text" class="form-control form-control-sm" id="input1_heart" placeholder="" style="width: 100px;"></td>
+                      </tr>
+                      <tr>
+                        <td><label for="input1_danger" class="form-label">DANGER</label></td>
+                        <td><input type="text" class="form-control form-control-sm" id="input1_danger" placeholder="" style="width: 100px;"></td>
+                      </tr>
+                      <tr>
+                        <td><label for="input1_temp" class="form-label">Temperature</label></td>
+                        <td><input type="text" class="form-control form-control-sm" id="input1_temp" placeholder="" style="width: 100px;"></td>
+                      </tr>
+                      <tr>
+                        <td><label for="input1_humi" class="form-label">Humidity</label></td>
+                        <td><input type="text" class="form-control form-control-sm" id="input1_humi" placeholder="" style="width: 100px;"></td>
+                      </tr>
+                      <tr>
+                        <td><label for="input1_meth" class="form-label">Methane</label></td>
+                        <td><input type="text" class="form-control form-control-sm" id="input1_meth" placeholder="" style="width: 100px;"></td>
+                      </tr>
+                      <tr>
+                        <td><label for="input1_cmon" class="form-label">Cmonoxide</label></td>
+                        <td><input type="text" class="form-control form-control-sm" id="input1_cmon" placeholder="" style="width: 100px;"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <div style="text-align: center;"><p class="state" id="input1_state">-</p></div>
+                  </div>
+              </div>
+              </div>
+
+              <div class="col-3">
+                <div class="card">
+                    <div class="card-header">
+                      worker2
+                      <button id="btn2" class="btn btn-secondary btn-sm"  style="float: right">Go to work</button>
+                    </div>
+                    <img src="img/worker2.png"alt="" />
+                    <div class="card-body">
+                    <table style="margin: 10px 0px; width: 100%; text-align: center;">
+                      <tbody>
+                        <tr>
+                          <td><label for="input2_loc" class="form-label">Location</label></td>
+                          <td><input type="text" class="form-control form-control-sm" id="input2_loc" placeholder="" style="width: 100px;" value="En"></td>
+                        </tr>
+                        <tr>
+                          <td><label for="input2_heart" class="form-label">Heart Rate</label></td>
+                          <td><input type="text" class="form-control form-control-sm" id="input2_heart" placeholder="" style="width: 100px;"></td>
+                        </tr>
+                        <tr>
+                          <td><label for="input2_danger" class="form-label">DANGER</label></td>
+                          <td><input type="text" class="form-control form-control-sm" id="input2_danger" placeholder="" style="width: 100px;"></td>
+                        </tr>
+                        <tr>
+                          <td><label for="input2_temp" class="form-label">Temperature</label></td>
+                          <td><input type="text" class="form-control form-control-sm" id="input2_temp" placeholder="" style="width: 100px;"></td>
+                        </tr>
+                        <tr>
+                          <td><label for="input2_humi" class="form-label">Humidity</label></td>
+                          <td><input type="text" class="form-control form-control-sm" id="input2_humi" placeholder="" style="width: 100px;"></td>
+                        </tr>
+                        <tr>
+                          <td><label for="input2_meth" class="form-label">Methane</label></td>
+                          <td><input type="text" class="form-control form-control-sm" id="input2_meth" placeholder="" style="width: 100px;"></td>
+                        </tr>
+                        <tr>
+                          <td><label for="input2_cmon" class="form-label">Cmonoxide</label></td>
+                          <td><input type="text" class="form-control form-control-sm" id="input2_cmon" placeholder="" style="width: 100px;"></td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <div style="text-align: center;"><p class="state" id="input2_state">-</p></div>
+                    </div>
+                </div>
+                </div>
+
+                <div class="col-3">
+                  <div class="card">
+                      <div class="card-header">
+                        worker3
+                        <button id="btn3" class="btn btn-secondary btn-sm"  style="float: right">Go to work</button>
+                      </div>
+                      <img src="img/worker2.png"alt="" />
+                      <div class="card-body">
+                      <table style="margin: 10px 0px; width: 100%; text-align: center;">
+                        <tbody>
+                          <tr>
+                            <td><label for="input3_loc" class="form-label">Location</label></td>
+                            <td><input type="text" class="form-control form-control-sm" id="input3_loc" placeholder="" style="width: 100px;" value="En"></td>
+                          </tr>
+                          <tr>
+                            <td><label for="input3_heart" class="form-label">Heart Rate</label></td>
+                            <td><input type="text" class="form-control form-control-sm" id="input3_heart" placeholder="" style="width: 100px;"></td>
+                          </tr>
+                          <tr>
+                            <td><label for="input3_danger" class="form-label">DANGER</label></td>
+                            <td><input type="text" class="form-control form-control-sm" id="input3_danger" placeholder="" style="width: 100px;"></td>
+                          </tr>
+                          <tr>
+                            <td><label for="input3_temp" class="form-label">Temperature</label></td>
+                            <td><input type="text" class="form-control form-control-sm" id="input3_temp" placeholder="" style="width: 100px;"></td>
+                          </tr>
+                          <tr>
+                            <td><label for="input3_humi" class="form-label">Humidity</label></td>
+                            <td><input type="text" class="form-control form-control-sm" id="input3_humi" placeholder="" style="width: 100px;"></td>
+                          </tr>
+                          <tr>
+                            <td><label for="input3_meth" class="form-label">Methane</label></td>
+                            <td><input type="text" class="form-control form-control-sm" id="input3_meth" placeholder="" style="width: 100px;"></td>
+                          </tr>
+                          <tr>
+                            <td><label for="input3_cmon" class="form-label">Cmonoxide</label></td>
+                            <td><input type="text" class="form-control form-control-sm" id="input3_cmon" placeholder="" style="width: 100px;"></td>
+                          </tr>
+                        </tbody>
+                      </table>
+
+                      <div style="text-align: center;"><p class="state" id="input3_state">-</p></div>
+                      </div>
+                  </div>
+                  </div>
+
+                  <div class="col-3">
+                    <div class="card">
+                        <div class="card-header">
+                          worker4
+                          <button id="btn4" class="btn btn-secondary btn-sm"  style="float: right">Go to work</button>
+                        </div>
+                        <img src="img/worker2.png"alt="" />
+                        <div class="card-body">
+                        <table style="margin: 10px 0px; width: 100%; text-align: center;">
+                          <tbody>
+                            <tr>
+                              <td><label for="input4_loc" class="form-label">Location</label></td>
+                              <td><input type="text" class="form-control form-control-sm" id="input4_loc" placeholder="" style="width: 100px;" value="En"></td>
+                            </tr>
+                            <tr>
+                              <td><label for="input4_heart" class="form-label">Heart Rate</label></td>
+                              <td><input type="text" class="form-control form-control-sm" id="input4_heart" placeholder="" style="width: 100px;"></td>
+                            </tr>
+                            <tr>
+                              <td><label for="input4_danger" class="form-label">DANGER</label></td>
+                              <td><input type="text" class="form-control form-control-sm" id="input4_danger" placeholder="" style="width: 100px;"></td>
+                            </tr>
+                            <tr>
+                              <td><label for="input4_temp" class="form-label">Temperature</label></td>
+                              <td><input type="text" class="form-control form-control-sm" id="input4_temp" placeholder="" style="width: 100px;"></td>
+                            </tr>
+                            <tr>
+                              <td><label for="input4_humi" class="form-label">Humidity</label></td>
+                              <td><input type="text" class="form-control form-control-sm" id="input4_humi" placeholder="" style="width: 100px;"></td>
+                            </tr>
+                            <tr>
+                              <td><label for="input4_meth" class="form-label">Methane</label></td>
+                              <td><input type="text" class="form-control form-control-sm" id="input4_meth" placeholder="" style="width: 100px;"></td>
+                            </tr>
+                            <tr>
+                              <td><label for="input4_cmon" class="form-label">Cmonoxide</label></td>
+                              <td><input type="text" class="form-control form-control-sm" id="input4_cmon" placeholder="" style="width: 100px;"></td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <div style="text-align: center;"><p class="state" id="input4_state">-</p></div>
+                        </div>
+                    </div>
+                    </div>
+
+        </div>
+        </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+  </body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<html lang="en" class="no-js">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Smart Working Environment Monitoring Service</title>
+  <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link href="https://fonts.googleapis.com/css?family=Raleway:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+  <link href="css/abc.css" rel="stylesheet">
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Plugin CSS -->
+  <link href="vendor/magnific-popup/magnific-popup.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="css/creative.min.css" rel="stylesheet">
+
+  <!-- jquery -->
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+
+  <!-- 모비우스 -->
+  <script src="./mobi-hero-mobius.js"></script>
+
+  <script>
+    // <ae>worker 생성 시, 모든 cnt, grp 자동 생성하고 cnt 중 name과 hp는 cin까지 등록해줌
+    function createWorker(workerId, name, hp){
+
+        console.log("<ae>worker register : " + workerId +' ' + name + ' ' + ' ' + hp);
+
+        let uri = path;
+
+        let item = {
+            "m2m:ae" : {
+                  "rn": workerId,
+                  "api": 'worker',
+                  "rr": true
+              }
+          }
+
+        fetch(uri, {
+        method: 'POST',
+        headers: {
+            //'Host':'<calculated when request is sent>',
+            //'User-Agent':'PostmanRuntime/7.28.4',
+            //'Accept': 'application/json',
+            //'Accept-Encoding':'gzip, deflate, br',
+            //'Connection':'keep-alive',
+            'X-M2M-RI':'12345',
+            'X-M2M-Origin':workerId,
+            'Content-Type': 'application/json;ty=2',
+            'Content-Length':'100'
+        },
+        body: JSON.stringify(item)
+    })
+        .then((res) => {
+            if (res.statusText == 'OK' || res.statusText == 'Created') {
+                res.json().then(data => {
+                    createCnt(workerId, 'name', 100, name);
+                    createCnt(workerId, 'hp', 100, hp);
+
+                    createCnt(workerId, 'location', 100, 'En');
+                    createCnt(workerId, 'heartrate', 100);
+                    createCnt(workerId, 'danger', 100, 0);
+
+                    createCnt(workerId, 'temperature', 100, 0);
+                    createCnt(workerId, 'humidity', 100, 0);
+                    createCnt(workerId, 'methane', 100, 0);
+                    createCnt(workerId, 'cmonoxide', 100, 0);
+
+                    createCnt(workerId, 'buzzer', 100, "OFF");
+
+                    createGrp(workerId, mode = 'biogrp');
+                    createGrp(workerId, mode = 'entgrp');
+                    createGrp(workerId, mode = 'notegrp');
+
+                });
+
+                alert("Registered.");
+                $('#userid').val('');
+                $('#username').val('');
+                $('#userphone').val('');
+
+            }
+            else {
+                alert('Error');
+                console.error(res);
+            }
+        }).catch(err => console.error(err));
+    }
+
+  </script>
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand js-scroll-trigger" href="index.html">Home</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="registration.html">Worker Registration</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="users.html">Worker Inquire</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="zone-monitoring.html">Zone Moniroting</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <header>
+      <h1></h1> <br>
+    </header>
+    <section>
+      <div id="container_demo">
+        <a class="hiddenanchor" id="tologin"></a>
+
+        <div id="wrapper">
+
+          <div id="login" class="animate form">
+            <form  action="#" target="iframe1">
+              <h1>Worker Registration</h1>
+
+              <p>
+                <label for="userid" class="userid"> ID </label>
+                <input id="userid" name="userid" type="text" />
+              </p>
+
+              <p>
+                <label for="username" class="username"> Name </label>
+                <input id="username" name="username" type="text" />
+              </p>
+
+              <p>
+                <label for="userphone" class="userphone"> H.P </label>
+                <input id="userphone" name="userphone" type="userphone" />
+              </p>
+
+              <p class="signin button">
+                <input type="button" name="submit" value="Input" onclick="createWorker($('#userid').val(), $('#username').val(), $('#userphone').val())"/>
+              </p>
+              <p class="change_link">
+                <a href="index.html">Back</a>
+              </p>
+            </form>
+            <iframe name="iframe1" style="display:none"></iframe>   <!-- 페이지 이동 방지 -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,214 @@
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Smart Working Environment Monitoring Service</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom fonts for this template -->
+  <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+
+  <!-- Plugin CSS -->
+  <link href="vendor/magnific-popup/magnific-popup.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="css/creative.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link href="https://fonts.googleapis.com/css?family=Raleway:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+  <link href="css/abc.css" rel="stylesheet">
+
+  <!-- jquery -->
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+
+  <!-- 모비우스 -->
+  <script src="./mobi-hero-mobius.js"></script>
+
+  <!-- 아이콘 -->
+  <script src="https://use.fontawesome.com/releases/v5.2.0/js/all.js"></script>
+
+  <style>
+    .box{
+      display: flex;
+      height: 150px;
+      width: 300px;
+      justify-content: center;
+      align-items: center;
+      border: solid 1px gray;
+      font-size:xx-large;
+      font-weight: bold;
+    }
+  </style>
+
+  <script>
+    let name = hp = loc = danger = '';
+
+    $(document).ready(function () {
+
+      // 페이지 이동 시 넘어오는 ae_resource 값
+      if(localStorage.getItem('list_item')){
+        let ae_resource = localStorage.getItem('list_item');
+        console.log(ae_resource);
+
+        // notegrp 값 가져옴
+        selectGrpAsync(ae_resource, 'notegrp').then((res) => {
+        if (res.statusText == 'OK') {
+          res.json().then(data => {
+
+            // console.log("notegrp 응답");
+            // console.log(data['m2m:agr']['m2m:rsp'][0]['pc']['m2m:cin']['con']);   // 이름
+            // console.log(data['m2m:agr']['m2m:rsp'][1]['pc']['m2m:cin']['con']);   // 전화번호
+
+            try{
+              name = data['m2m:agr']['m2m:rsp'][0]['pc']['m2m:cin']['con'];
+              hp = data['m2m:agr']['m2m:rsp'][1]['pc']['m2m:cin']['con'];
+            } catch{
+              console.log("notegrp catch!");
+            }
+
+            // 여기에 notegrp 값 활용 코드 작업
+            $('#item1').text(ae_resource);
+            $('#item2').text(name);
+            $('#item3').text(hp);
+
+          });
+        }
+      }).catch(err => console.error(err));
+
+      // biogrp 값 가져옴
+      selectGrpAsync(ae_resource, 'biogrp').then((res) => {
+        if (res.statusText == 'OK') {
+          res.json().then(data => {
+
+            try{
+              loc = data['m2m:agr']['m2m:rsp'][0]['pc']['m2m:cin']['con'];
+              $("#box1").text(loc);
+
+            }catch{
+              console.log("biogrp catch!");
+              $("#box1").text('');
+              $("#box1").append('<i class="fas fa-exclamation-triangle"></i>')
+            }
+
+            try{
+              danger = data['m2m:agr']['m2m:rsp'][2]['pc']['m2m:cin']['con'];
+              if(danger == '0'){
+                $("#box2").text("NORMAL");
+                $("#box2").css("color","green");
+              }
+              else{
+                $("#box2").text("FALL DOWN");
+                $("#box2").css("color","red");
+              }
+            }catch{
+              console.log("biogrp catch!");
+              $("#box2").text('');
+              $("#box2").append('<i class="fas fa-exclamation-triangle"></i>');
+            }
+          });
+        }
+      }).catch(err => console.error(err));
+
+
+      }
+
+    });
+  </script>
+
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand js-scroll-trigger" href="index.html">Home</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="registration.html">Worker Registration</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="users.html">Worker Inquire</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="zone-monitoring.html">Zone Moniroting</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+<section>
+  <div class="container">
+      <div id="container_demo">
+        <a class="hiddenanchor" id="toadmin_users"></a>
+
+        <div id="wrapper2">
+
+          <div id="login" class="animate form">
+
+            <form>
+              <h1>Worker Information</h1>
+
+              <table>
+                <tr>
+                  <td><b> ID </b></td>
+                  <td style="padding: 0px 10px;"><b>:</b></td>
+                  <td><span id="item1"></span></td>
+                </tr>
+                <tr>
+                  <td><b> Name </b></td>
+                  <td style="padding: 0px 10px;"><b>:</b></td>
+                  <td><span id="item2"></span></td>
+                </tr>
+                <tr>
+                  <td><b> H.P </b></td>
+                  <td style="padding: 0px 10px;"><b>:</b></td>
+                  <td><span id="item3"></span></td>
+                </tr>
+              </table>
+
+              <br>
+
+              <table style="width: 100%;">
+                <tr>
+                  <th><b> Location </b></th>
+                  <th><b> Fall Down </b></th>
+                </tr>
+                <tr>
+                  <td> <div class="box" id="box1"></div> </td>
+                  <td> <div class="box" id="box2"></div> </td>
+                </tr>
+              </table>
+
+              <br>
+
+              <i class="exclamation-circle"></i>
+
+              <br><br>
+
+              <p class="change_link2">
+
+                <a href="users.html">Back</a>
+
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+
+</html>

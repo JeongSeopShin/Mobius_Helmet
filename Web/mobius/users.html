@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Smart Working Environment Monitoring Service</title>
+  <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link href="https://fonts.googleapis.com/css?family=Raleway:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+  <link href="css/abc.css" rel="stylesheet">
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Plugin CSS -->
+  <link href="vendor/magnific-popup/magnific-popup.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="css/creative.min.css" rel="stylesheet">
+
+  <!-- jquery -->
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+
+  <!-- 모비우스 -->
+  <script src="./mobi-hero-mobius.js"></script>
+
+
+  <style>
+    table {
+      border-collapse: collapse;
+      width: auto;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 3px;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2
+    }
+
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+  </style>
+
+<script>
+  $(document).ready(function () {
+    selectWorker();
+  });
+
+  function selectWorker(){
+
+    console.log("worker Inquire : ");
+
+    let uri = path + '?rcn=4&ty=2';
+
+    fetch(uri, {
+      method: 'GET',
+      headers: {
+          'Host':'<calculated when request is sent>',
+          'User-Agent':'PostmanRuntime/7.28.4',
+          'Accept': 'application/json',
+          'Accept-Encoding':'gzip, deflate, br',
+          'Connection':'keep-alive',
+          'X-M2M-RI':'12345',
+          'X-M2M-Origin':'admin',
+          'Content-Type': 'application/json'
+      }
+      })
+      .then((res) => {
+          if (res.statusText == 'OK') {
+              res.json().then(data => {
+                  console.log(data);
+
+                  $("#worker_table > tbody > tr").remove();
+
+                  let list = data['m2m:rsp']['m2m:ae'];
+
+                  let idx = 0;
+                  for(let i=0; i<list.length; i++){
+                      if(list[i]['api'] == 'worker'){
+
+                          console.log(list[i]['rn']);
+
+                          let table = $("#worker_table");
+
+                          selectGrpAsync(list[i]['rn'], 'notegrp').then((res) => {
+                              if (res.statusText == 'OK' || res.statusText == 'Created') {
+                                  res.json().then(data => {
+                                      idx +=1;
+
+                                      let name = data["m2m:agr"]["m2m:rsp"][0]["pc"]["m2m:cin"]["con"];       // 이름
+                                      let hp = data["m2m:agr"]["m2m:rsp"][1]["pc"]["m2m:cin"]["con"];         // 전화번호
+                                      let loc = data["m2m:agr"]["m2m:rsp"][2]["pc"]["m2m:cin"]["con"];        // 출근 상태
+
+                                      loc = loc=='En' ? '-' : 'On';
+
+                                      let row = "<tr>"
+                                          + "<td>" + idx + "</td>"
+                                          + "<td>" + list[i]['rn'] + "</td>"
+                                          + "<td>" + name + "</td>"
+                                          + "<td>" + hp + "</td>"
+                                          + "<td>" + loc + "</td>"
+                                          //+ "<td><a href='list.html' onclick='clickListPage(this)'>조회</a></td>"
+                                          //+ "<td><a href='monitoring.html' onclick='clickMonitoringPage(this)'>모니터링</a></td>"
+                                          //+ "<td><a href='' onclick='clickDeleteWorker(this)'>삭제</a></td>"
+                                          + "<td><button type='button' class='btn btn-dark btn-sm' onclick='clickListPage(this)'>Inquire</button></td>"
+                                          + "<td><button type='button' class='btn btn-info btn-sm' onclick='clickMonitoringPage(this)'>Monitoring</button></td>"
+                                          + "<td><button type='button' class='btn btn-primary btn-sm' onclick='clickDeleteWorker(this)'>Delete</button></td>"
+                                          + "</tr>";
+
+                                      table.append(row);
+                                  });
+                              }
+                              else {
+                                  alert('Error');
+                                  console.error(res);
+                              }
+                          }).catch(err => console.error(err));
+                      }
+                  }
+              });
+          }
+          else {
+              alert('Error');
+              console.error(res);
+          }
+      }).catch(err => console.error(err));
+}
+
+// 작업자조회 > 조회 버튼 클릭 이벤트
+function clickListPage(id){
+  let ae_resource = $(id).closest('tr').find("td:eq(1)").text();
+  localStorage.setItem('list_item', ae_resource);
+
+  location.href='list.html';
+}
+
+// 작업자조회 > 모니터링 버튼 클릭 이벤트
+function clickMonitoringPage(id){
+  let ae_resource = $(id).closest('tr').find("td:eq(1)").text();
+  let name = $(id).closest('tr').find("td:eq(2)").text();
+  localStorage.setItem('list_item', ae_resource);
+  localStorage.setItem('list_item2', name);
+
+  location.href='monitoring.html';
+}
+
+// 작업자조회 > 삭제 버튼 클릭 이벤트
+function clickDeleteWorker(id){
+  let ae_resource = $(id).closest('tr').find("td:eq(1)").text();
+
+  let res = confirm("Worker '" + ae_resource + "' Delete?");
+  if(res){
+    deleteAe(ae_resource);
+  }
+}
+</script>
+
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand js-scroll-trigger" href="index.html">Home</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="registration.html">Worker Registration</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="users.html">Worker Inquire</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="zone-monitoring.html">Zone Moniroting</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <header>
+      <h1></h1> <br><br><br>
+    </header>
+    <section>
+      <div id="container_demo">
+        <a class="hiddenanchor" id="toadmin_users"></a>
+
+        <div id="wrapper2">
+
+          <div id="login" class="animate form">
+
+            <form>
+              <h1>Worker Inquire</h1>
+
+              <table border="2" align="center" id="worker_table">
+                <thead>
+                  <tr bgcolor="yellow" align="center">
+                    <th> No </th>
+                    <th> ID </th>
+                    <th> Name </th>
+                    <th> H.P </th>
+                    <th> Go To Work </th>
+                    <th> Inquire </th>
+                    <th> Monitoring </th>
+                    <th> Delete </th>
+                  </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+              </table> <br><br>
+
+
+              <p class="change_link2">
+
+                <a href="index.html">Back</a>
+
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+
+</html>

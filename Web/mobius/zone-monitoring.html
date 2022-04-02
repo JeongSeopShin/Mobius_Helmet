@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+
+<html lang="en" class="no-js">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Smart Working Environment Monitoring Service</title>
+  <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link href="https://fonts.googleapis.com/css?family=Raleway:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+  <link href="css/abc.css" rel="stylesheet">
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Plugin CSS -->
+  <link href="vendor/magnific-popup/magnific-popup.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="css/creative.min.css" rel="stylesheet">
+
+  <!-- jquery -->
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+
+  <!-- 모비우스 -->
+  <script src="./mobi-hero-mobius.js"></script>
+
+  <!-- 아이콘 -->
+  <script src="https://use.fontawesome.com/releases/v5.2.0/js/all.js"></script>
+
+  <!-- 차트 -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+
+  <style>
+    .box{
+      display: flex;
+      height: 150px;
+      width: 220px;
+      justify-content: center;
+      align-items: center;
+      border: solid 1px gray;
+      font-size:xx-large;
+      font-weight: bold;
+    }
+
+    .placeBox{
+      border: 1px solid black;
+      width: 100%;
+      height: 100px;
+      margin-bottom: 20px;
+      padding: 10px;
+    }
+
+    #notiCard{
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+
+
+      padding: 5px;
+      font-size: small;
+      text-align: left;
+    }
+    .card-body{
+      padding: 10px;
+    }
+    .card-header{
+      padding: 5px;
+    }
+
+    #notiTable{
+      width: 300px;
+    }
+  </style>
+
+</head>
+
+<body id="page-top">
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand js-scroll-trigger" href="index.html">Home</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="registration.html">Worker Registration</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="users.html">Worker Inquire</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="zone-monitoring.html">Zone Moniroting</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+<div class="container">
+
+  <section>
+    <div id="container_demo">
+      <a class="hiddenanchor" id="toadmin_users"></a>
+
+      <div id="wrapper2">
+
+        <div id="login" class="animate form">
+
+          <form>
+            <h1>Zone Monitoring</h1>
+
+            <img src="./img/drawing.png" width="100%" alt="" style="margin-bottom: 10px;">
+
+            <div class="placeBox">
+              <label style="font-weight: bolder;">A1</label>
+              <label style="float: right">Number of people : <label id="total_a1">0</label></label>
+              <br><br>
+              <p id="list_a1"></p>
+            </div>
+            <div class="placeBox">
+              <label style="font-weight: bolder;">A2</label>
+              <label style="float: right">Number of people : <label id="total_a2">0</label></label>
+              <br><br>
+              <p id="list_a2"></p>
+            </div>
+            <div class="placeBox">
+              <label style="font-weight: bolder;">A3</label>
+              <label style="float: right">Number of people : <label id="total_a3">0</label></label>
+              <br><br>
+              <p id="list_a3"></p>
+            </div>
+            <div class="placeBox">
+              <label style="font-weight: bolder;">A4</label>
+              <label style="float: right">Number of people : <label id="total_a4">0</label></label>
+              <br><br>
+              <p id="list_a4"></p>
+            </div>
+
+            <br>
+            <!--온도 그래프-->
+            <div class="chart-container" style="position: relative; height:300px; width:100%; margin-bottom: 50px;">
+              <canvas id="tempChart"></canvas>
+            </div>
+            <br>
+            <br>
+            <br>
+
+            <!--습도 그래프-->
+            <div class="chart-container" style="position: relative; height:300px; width:100%; margin-bottom: 50px;">
+              <canvas id="humiChart"></canvas>
+            </div>
+            <br>
+            <br>
+            <br>
+
+            <!--메탄가스 그래프-->
+            <div class="chart-container" style="position: relative; height:300px; width:100%; margin-bottom: 50px;">
+              <canvas id="methChart"></canvas>
+            </div>
+            <br>
+            <br>
+            <br>
+
+            <!--일산화탄소 그래프-->
+            <div class="chart-container" style="position: relative; height:300px; width:100%; margin-bottom: 50px;">
+              <canvas id="cmonChart"></canvas>
+            </div>
+            <br>
+
+            <br><br>
+
+
+            <p class="change_link2">
+
+              <a href="index.html">Back</a>
+
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="card" id="notiCard">
+    <div class="card-header">
+					<button type="button" class="close" onclick="closeNoti()">
+						<span aria-hidden="true">&times;</span>
+					</button>
+    </div>
+    <div class="card-body">
+      <table id="notiTable">
+        <tbody>
+          <tr>
+            <td id="td1"></td>
+          </tr>
+          <tr>
+            <td id="td2"></td>
+          </tr>
+          <tr>
+            <td id="td3"></td>
+          </tr>
+          <tr>
+            <td id="td4"></td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+</div>
+
+
+<script>
+
+  function closeNoti(){
+    $('#notiCard').hide();
+  }
+
+  function openNoti(){
+    $('#notiCard').show();
+  }
+
+  let ae_resource;
+  let name;
+
+  $(document).ready(function () {
+
+    $('#notiCard').hide();
+
+      displayZoneList();
+      startDisplayZoneList();
+
+      // 온도 그래프 그림
+      drawZoneTempChart();
+
+      // 습도 그래프 그림
+      drawZoneHumiChart();
+
+      // 메탄가스 그래프 그림
+      drawZoneMethChart();
+
+      // 일산화탄소 그래프 그림
+      drawZoneCmonChart();
+
+  });
+
+  startDisplayZoneList = function() {
+    playAlert = setInterval(function() {
+      displayZoneList();
+    }, 5000);
+  };
+
+  function displayZoneList(){
+    console.log("worker list : ");
+
+    let uri = path + '?rcn=4&ty=2';
+
+    fetch(uri, {
+      method: 'GET',
+      headers: {
+          'Host':'<calculated when request is sent>',
+          'User-Agent':'PostmanRuntime/7.28.4',
+          'Accept': 'application/json',
+          'Accept-Encoding':'gzip, deflate, br',
+          'Connection':'keep-alive',
+          'X-M2M-RI':'12345',
+          'X-M2M-Origin':'admin',
+          'Content-Type': 'application/json'
+      }
+      })
+      .then((res) => {
+          if (res.statusText == 'OK') {
+              res.json().then(data => {
+
+                  let list = data['m2m:rsp']['m2m:ae'];
+
+                  let a1_str = "";
+                  let a2_str = "";
+                  let a3_str = "";
+                  let a4_str = "";
+
+                  let a1_num = 0;
+                  let a2_num = 0;
+                  let a3_num = 0;
+                  let a4_num = 0;
+
+                  for(let i=0; i<list.length; i++){
+                      if(list[i]['api'] == 'worker'){
+
+                          selectGrpAsync(list[i]['rn'], 'notegrp').then((res) => {
+                              if (res.statusText == 'OK' || res.statusText == 'Created') {
+                                  res.json().then(data => {
+
+                                      let name = data["m2m:agr"]["m2m:rsp"][0]["pc"]["m2m:cin"]["con"];       // 이름
+                                      let hp = data["m2m:agr"]["m2m:rsp"][1]["pc"]["m2m:cin"]["con"];         // 전화번호
+                                      let loc = data["m2m:agr"]["m2m:rsp"][2]["pc"]["m2m:cin"]["con"];        // 출근 상태
+
+                                      console.log(list[i]['rn'] + ' : ' +name + ' ' + hp + ' ' + loc);
+
+                                      if(loc == 'A1'){
+                                        a1_num++;
+                                        a1_str = a1_str + name + ' ';
+                                      }
+                                      else if(loc == 'A2'){
+                                        a2_num++;
+                                        a2_str = a2_str + name + ' ';
+                                      }
+                                      else if(loc == 'A3'){
+                                        a3_num++;
+                                        a3_str = a3_str + name + ' ';
+                                      }
+                                      else if(loc == 'A4'){
+                                        a4_num++;
+                                        a4_str = a4_str + name + ' ';
+                                      }
+                                      else{
+                                      }
+
+                                      // 구역별 인원 목록 작성
+                                      $('#total_a1').text(a1_num);
+                                      $('#list_a1').text(a1_str);
+
+                                      $('#total_a2').text(a2_num);
+                                      $('#list_a2').text(a2_str);
+
+                                      $('#total_a3').text(a3_num);
+                                      $('#list_a3').text(a3_str);
+
+                                      $('#total_a4').text(a4_num);
+                                      $('#list_a4').text(a4_str);
+
+                                  });
+                              }
+                              else {
+                                  alert('ERROR');
+                                  console.error(res);
+                              }
+                          }).catch(err => console.error(err));
+                      }
+                  }
+              });
+          }
+          else {
+              alert('ERROR');
+              console.error(res);
+          }
+      }).catch(err => console.error(err));
+  }
+  </script>
+
+
+<!-- 구역별 온도 그래프 관련 -->
+<script>
+  let tList = [];
+
+  let tempConfig;
+  let tempCtx;
+	let tempChart;
+
+  startZoneCheckTempChart = function() {
+    playAlert = setInterval(function() {
+      checkZoneTempChart();
+    }, 5000);
+  };
+
+  function drawZoneTempChart(){
+    selectGrpAsync('Zone', 'ztempgrp').then((res) => {
+        if (res.statusText == 'OK') {
+          res.json().then(data => {
+
+            tList.push(data['m2m:agr']['m2m:rsp'][0]['pc']['m2m:cin']['con']);     // A1 구역 온도 값
+            tList.push(data['m2m:agr']['m2m:rsp'][1]['pc']['m2m:cin']['con']);     // A2 구역 온도 값
+            tList.push(data['m2m:agr']['m2m:rsp'][2]['pc']['m2m:cin']['con']);     // A3 구역 온도 값
+            tList.push(data['m2m:agr']['m2m:rsp'][3]['pc']['m2m:cin']['con']);     // A4 구역 온도 값
+
+            console.log(tList);
+
+            tempCtx = document.getElementById('tempChart').getContext('2d');
+            tempConfig = {
+                type: 'bar', // 차트의 형태
+                data: { // 차트에 들어갈 데이터
+                    labels: [
+                        //x 축
+                        'A1','A2','A3','A4'
+                    ],
+                    datasets: [
+                        { //데이터
+                            label: '', //차트 제목
+                            fill: false, // line 형태일 때, 선 안쪽을 채우는지 안채우는지
+                            data: tList,
+                            backgroundColor: [
+                                //색상
+                                'rgba(255, 99, 132, 0.2)',
+                                'rgba(54, 162, 235, 0.2)',
+                                'rgba(255, 206, 86, 0.2)',
+                                'rgba(75, 192, 192, 0.2)'
+                            ],
+                            borderColor: [
+                                //경계선 색상
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)'
+                            ],
+                            borderWidth: 1 //경계선 굵기
+                        }
+                    ]
+                },
+                options: {
+                  legend: {
+                    display: false
+                  },
+                  title: {
+                    display : true, text: 'Temperature graph by zone'
+                  },
+                    scales: {
+                        yAxes: [
+                            {
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }
+                        ]
+                    }
+                }
+            };
+            tempChart = new Chart(tempCtx, tempConfig);
+            startZoneCheckTempChart();
+          });
+        }
+      }).catch(err => console.error(err));
+  }
+
+  // 데이터 select해서 그래프에 그려지지 않은 데이터 있으면 추가
+  function checkZoneTempChart(){
+    selectGrpAsync('Zone', 'ztempgrp').then((res) => {
+        if (res.statusText == 'OK') {
+          res.json().then(data => {
+
+            let newList = [];
+
+            newList.push(data['m2m:agr']['m2m:rsp'][0]['pc']['m2m:cin']['con']);     // A1 구역 온도 값
+            newList.push(data['m2m:agr']['m2m:rsp'][1]['pc']['m2m:cin']['con']);     // A2 구역 온도 값
+            newList.push(data['m2m:agr']['m2m:rsp'][2]['pc']['m2m:cin']['con']);     // A3 구역 온도 값
+            newList.push(data['m2m:agr']['m2m:rsp'][3]['pc']['m2m:cin']['con']);     // A4 구역 온도 값
+
+            if(JSON.stringify(tList)!=JSON.stringify(newList)){
+
+              console.log("temp data change detection");
+
+              //데이터셋 수 만큼 반복
+              var dataset = tempConfig.data.datasets;
+              var data = dataset[0].data;
+              for(var i=0 ; i < data.length ; i++){
+                  data[i] = newList[i];
+              }
+              tempChart.update();	//차트 업데이트
+
+              let dangerList = [];
+              for(let i=0; i<4; i++){
+                if(data[i] > 48){
+                  let str = 'A'+(i+1);
+                  dangerList.push(str);
+                }
+              }
+              if(dangerList.length != 0){
+                $('#notiCard').show();
+                $('#td1').text(dangerList.toString()+' temperature is dangerous');
+              }
+              else{
+                $('#td1').text('');
+                if($('#td1').text() == '' && $('#td2').text()=='' && $('#td3').text()=='' && $('#td4').text()==''){
+                  $('#notiCard').hide();
+                }
+              }
+            }
+          });
+        }
+      }).catch(err => console.error(err));
+  }
+</script>
+
+
+<!-- 구역별 습도 그래프 관련 -->
+<script>
+  let hList = [];
+
+  let humiConfig;
+  let humiCtx;
+	let humiChart;
+
+  startZoneCheckHumiChart = function() {
+    playAlert = setInterval(function() {
+      checkZoneHumiChart();
+    }, 5000);
+  };
+
+  function drawZoneHumiChart(){
+    selectGrpAsync('Zone', 'zhumigrp').then((res) => {
+        if (res.statusText == 'OK') {
+          res.json().then(data => {
+
+            hList.push(data['m2m:agr']['m2m:rsp'][0]['pc']['m2m:cin']['con']);     // A1 구역 온도 값
+            hList.push(data['m2m:agr']['m2m:rsp'][1]['pc']['m2m:cin']['con']);     // A2 구역 온도 값
+            hList.push(data['m2m:agr']['m2m:rsp'][2]['pc']['m2m:cin']['con']);     // A3 구역 온도 값
+            hList.push(data['m2m:agr']['m2m:rsp'][3]['pc']['m2m:cin']['con']);     // A4 구역 온도 값
+
+            console.log(hList);
+
+            humiCtx = document.getElementById('humiChart').getContext('2d');
+            humiConfig = {
+                type: 'bar', // 차트의 형태
+                data: { // 차트에 들어갈 데이터
+                    labels: [
+                        //x 축
+                        'A1','A2','A3','A4'
+                    ],
+                    datasets: [
+                        { //데이터
+                            label: '', //차트 제목
+                            fill: false, // line 형태일 때, 선 안쪽을 채우는지 안채우는지
+                            data: hList,
+                            backgroundColor: [
+                                //색상
+                                'rgba(255, 99, 132, 0.2)',
+                                'rgba(54, 162, 235, 0.2)',
+                                'rgba(255, 206, 86, 0.2)',
+                                'rgba(75, 192, 192, 0.2)'
+                            ],
+                            borderColor: [
+                                //경계선 색상
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)'
+                            ],
+                            borderWidth: 1 //경계선 굵기
+                        }
+                    ]
+                },
+                options: {
+                  legend: {
+                    display: false
+                  },
+                  title: {
+                    display : true, text: 'Humidity graph by zone'
+                  },
+                    scales: {
+                        yAxes: [
+                            {
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }
+                        ]
+                    }
+                }
+            };
+            humiChart = new Chart(humiCtx, humiConfig);
+            startZoneCheckHumiChart();
+          });
+        }
+      }).catch(err => console.error(err));
+  }
+
+  // 데이터 select해서 그래프에 그려지지 않은 데이터 있으면 추가
+  function checkZoneHumiChart(){
+    selectGrpAsync('Zone', 'zhumigrp').then((res) => {
+        if (res.statusText == 'OK') {
+          res.json().then(data => {
+
+            let newList = [];
+
+            newList.push(data['m2m:agr']['m2m:rsp'][0]['pc']['m2m:cin']['con']);     // A1 구역 온도 값
+            newList.push(data['m2m:agr']['m2m:rsp'][1]['pc']['m2m:cin']['con']);     // A2 구역 온도 값
+            newList.push(data['m2m:agr']['m2m:rsp'][2]['pc']['m2m:cin']['con']);     // A3 구역 온도 값
+            newList.push(data['m2m:agr']['m2m:rsp'][3]['pc']['m2m:cin']['con']);     // A4 구역 온도 값
+
+            if(JSON.stringify(hList)!=JSON.stringify(newList)){
+
+              console.log("humi data change detection");
+
+              //데이터셋 수 만큼 반복
+              var dataset = humiConfig.data.datasets;
+              var data = dataset[0].data;
+              for(var i=0 ; i < data.length ; i++){
+                  data[i] = newList[i];
+              }
+              humiChart.update();	//차트 업데이트
+
+              let dangerList = [];
+              for(let i=0; i<4; i++){
+                if(data[i] > 68){
+                  let str = 'A'+(i+1);
+                  dangerList.push(str);
+                }
+              }
+              if(dangerList.length != 0){
+                $('#notiCard').show();
+                $('#td2').text(dangerList.toString()+' humidity is dangerous');
+              }
+              else{
+                $('#td2').text('');
+                if($('#td1').text() == '' && $('#td2').text()=='' && $('#td3').text()=='' && $('#td4').text()==''){
+                  $('#notiCard').hide();
+                }
+              }
+            }
+          });
+        }
+      }).catch(err => console.error(err));
+  }
+</script>
+
+
+<!-- 구역별 메탄가스 그래프 관련 -->
+<script>
+  let mList = [];
+
+  let methConfig;
+  let methCtx;
+	let methChart;
+
+  startZoneCheckMethChart = function() {
+    playAlert = setInterval(function() {
+      checkZoneMethChart();
+    }, 5000);
+  };
+
+  function drawZoneMethChart(){
+    selectGrpAsync('Zone', 'zmethgrp').then((res) => {
+        if (res.statusText == 'OK') {
+          res.json().then(data => {
+
+            mList.push(data['m2m:agr']['m2m:rsp'][0]['pc']['m2m:cin']['con']);
+            mList.push(data['m2m:agr']['m2m:rsp'][1]['pc']['m2m:cin']['con']);
+            mList.push(data['m2m:agr']['m2m:rsp'][2]['pc']['m2m:cin']['con']);
+            mList.push(data['m2m:agr']['m2m:rsp'][3]['pc']['m2m:cin']['con']);
+
+            console.log(mList);
+
+            methCtx = document.getElementById('methChart').getContext('2d');
+            methConfig = {
+                type: 'bar', // 차트의 형태
+                data: { // 차트에 들어갈 데이터
+                    labels: [
+                        //x 축
+                        'A1','A2','A3','A4'
+                    ],
+                    datasets: [
+                        { //데이터
+                            label: '', //차트 제목
+                            fill: false, // line 형태일 때, 선 안쪽을 채우는지 안채우는지
+                            data: mList,
+                            backgroundColor: [
+                                //색상
+                                'rgba(255, 99, 132, 0.2)',
+                                'rgba(54, 162, 235, 0.2)',
+                                'rgba(255, 206, 86, 0.2)',
+                                'rgba(75, 192, 192, 0.2)'
+                            ],
+                            borderColor: [
+                                //경계선 색상
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)'
+                            ],
+                            borderWidth: 1 //경계선 굵기
+                        }
+                    ]
+                },
+                options: {
+                  legend: {
+                    display: false
+                  },
+                  title: {
+                    display : true, text: 'Methane gas graph by zone'
+                  },
+                    scales: {
+                        yAxes: [
+                            {
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }
+                        ]
+                    }
+                }
+            };
+            methChart = new Chart(methCtx, methConfig);
+            startZoneCheckMethChart();
+          });
+        }
+      }).catch(err => console.error(err));
+  }
+
+  // 데이터 select해서 그래프에 그려지지 않은 데이터 있으면 추가
+  function checkZoneMethChart(){
+    selectGrpAsync('Zone', 'zmethgrp').then((res) => {
+        if (res.statusText == 'OK') {
+          res.json().then(data => {
+
+            let newList = [];
+
+            newList.push(data['m2m:agr']['m2m:rsp'][0]['pc']['m2m:cin']['con']);
+            newList.push(data['m2m:agr']['m2m:rsp'][1]['pc']['m2m:cin']['con']);
+            newList.push(data['m2m:agr']['m2m:rsp'][2]['pc']['m2m:cin']['con']);
+            newList.push(data['m2m:agr']['m2m:rsp'][3]['pc']['m2m:cin']['con']);
+
+            if(JSON.stringify(mList)!=JSON.stringify(newList)){
+
+              console.log("meth data change detection");
+
+              //데이터셋 수 만큼 반복
+              var dataset = methConfig.data.datasets;
+              var data = dataset[0].data;
+              for(var i=0 ; i < data.length ; i++){
+                  data[i] = newList[i];
+              }
+              methChart.update();	//차트 업데이트
+
+              let dangerList = [];
+              for(let i=0; i<4; i++){
+                if(data[i] > 48){
+                  let str = 'A'+(i+1);
+                  dangerList.push(str);
+                }
+              }
+
+              console.log("Methane Hazard Arrangement");
+              console.log(dangerList);
+
+              if(dangerList.length != 0){
+                $('#notiCard').show();
+                $('#td3').text(dangerList.toString()+' methane gas is dangerous.');
+                console.log("methane if!");
+              }
+              else{
+                $('#td3').text('');
+                console.log("methane else!");
+                console.log($('#td1').text() == '');
+                console.log($('#td2').text() == '');
+                console.log($('#td3').text() == '');
+                console.log($('#td4').text() == '');
+                if($('#td1').text() == '' && $('#td2').text()=='' && $('#td3').text()=='' && $('#td4').text()==''){
+                  $('#notiCard').hide();
+                  console.log("methane hide!");
+                }
+              }
+            }
+          });
+        }
+      }).catch(err => console.error(err));
+  }
+</script>
+
+
+<!-- 구역별 일산화탄소 그래프 관련 -->
+<script>
+  let cList = [];
+
+  let cmonConfig;
+  let cmonCtx;
+	let cmonChart;
+
+  startZoneCheckCmonChart = function() {
+    playAlert = setInterval(function() {
+      checkZoneCmonChart();
+    }, 5000);
+  };
+
+  function drawZoneCmonChart(){
+    selectGrpAsync('Zone', 'zcmongrp').then((res) => {
+        if (res.statusText == 'OK') {
+          res.json().then(data => {
+
+            cList.push(data['m2m:agr']['m2m:rsp'][0]['pc']['m2m:cin']['con']);
+            cList.push(data['m2m:agr']['m2m:rsp'][1]['pc']['m2m:cin']['con']);
+            cList.push(data['m2m:agr']['m2m:rsp'][2]['pc']['m2m:cin']['con']);
+            cList.push(data['m2m:agr']['m2m:rsp'][3]['pc']['m2m:cin']['con']);
+
+            cmonCtx = document.getElementById('cmonChart').getContext('2d');
+            cmonConfig = {
+                type: 'bar', // 차트의 형태
+                data: { // 차트에 들어갈 데이터
+                    labels: [
+                        //x 축
+                        'A1','A2','A3','A4'
+                    ],
+                    datasets: [
+                        { //데이터
+                            label: '', //차트 제목
+                            fill: false, // line 형태일 때, 선 안쪽을 채우는지 안채우는지
+                            data: cList,
+                            backgroundColor: [
+                                //색상
+                                'rgba(255, 99, 132, 0.2)',
+                                'rgba(54, 162, 235, 0.2)',
+                                'rgba(255, 206, 86, 0.2)',
+                                'rgba(75, 192, 192, 0.2)'
+                            ],
+                            borderColor: [
+                                //경계선 색상
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)'
+                            ],
+                            borderWidth: 1 //경계선 굵기
+                        }
+                    ]
+                },
+                options: {
+                  legend: {
+                    display: false
+                  },
+                  title: {
+                    display : true, text: 'Cmonoxide graph by zone'
+                  },
+                    scales: {
+                        yAxes: [
+                            {
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }
+                        ]
+                    }
+                }
+            };
+            cmonChart = new Chart(cmonCtx, cmonConfig);
+            startZoneCheckCmonChart();
+          });
+        }
+      }).catch(err => console.error(err));
+  }
+
+  // 데이터 select해서 그래프에 그려지지 않은 데이터 있으면 추가
+  function checkZoneCmonChart(){
+    selectGrpAsync('Zone', 'zcmongrp').then((res) => {
+        if (res.statusText == 'OK') {
+          res.json().then(data => {
+
+            let newList = [];
+
+            newList.push(data['m2m:agr']['m2m:rsp'][0]['pc']['m2m:cin']['con']);
+            newList.push(data['m2m:agr']['m2m:rsp'][1]['pc']['m2m:cin']['con']);
+            newList.push(data['m2m:agr']['m2m:rsp'][2]['pc']['m2m:cin']['con']);
+            newList.push(data['m2m:agr']['m2m:rsp'][3]['pc']['m2m:cin']['con']);
+
+            if(JSON.stringify(cList)!=JSON.stringify(newList)){
+
+              console.log("cmon data change detection");
+
+              //데이터셋 수 만큼 반복
+              var dataset = cmonConfig.data.datasets;
+              var data = dataset[0].data;
+              for(var i=0 ; i < data.length ; i++){
+                  data[i] = newList[i];
+              }
+              cmonChart.update();	//차트 업데이트
+
+              let dangerList = [];
+              for(let i=0; i<4; i++){
+                if(data[i] > 48){
+                  let str = 'A'+(i+1);
+                  dangerList.push(str);
+                }
+              }
+
+              console.log("Cmonoxide Hazard Arrangement");
+              console.log(dangerList);
+
+              if(dangerList.length != 0){
+                $('#notiCard').show();
+                $('#td4').text(dangerList.toString()+' Cmonoxide is dangerous');
+                console.log("Cmonoxide if");
+              }
+              else{
+                $('#td4').textCmonoxide
+                console.log("일산화탄소 else");
+                if($('#td1').text() == '' && $('#td2').text()=='' && $('#td3').text()=='' && $('#td4').text()==''){
+                  $('#notiCard').hide();
+                  console.log("Cmonoxide hide");
+                }
+              }
+            }
+          });
+        }
+      }).catch(err => console.error(err));
+  }
+</script>
+
+
+
+</body>
+
+<!-- Bootstrap core JavaScript -->
+<script src="vendor/jquery/jquery.min.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Plugin JavaScript -->
+<script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+<script src="vendor/scrollreveal/scrollreveal.min.js"></script>
+<script src="vendor/magnific-popup/jquery.magnific-popup.min.js"></script>
+
+<!-- Custom scripts for this template -->
+<script src="js/creative.min.js"></script>
+
+</body>
+
+</html>

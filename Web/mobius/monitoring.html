@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+
+<html lang="en" class="no-js">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Smart Working Environment Monitoring Service</title>
+  <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link href="https://fonts.googleapis.com/css?family=Raleway:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+  <link href="css/abc.css" rel="stylesheet">
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Plugin CSS -->
+  <link href="vendor/magnific-popup/magnific-popup.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="css/creative.min.css" rel="stylesheet">
+
+  <!-- jquery -->
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+
+  <!-- 모비우스 -->
+  <script src="./mobi-hero-mobius.js"></script>
+
+  <!-- 아이콘 -->
+  <script src="https://use.fontawesome.com/releases/v5.2.0/js/all.js"></script>
+
+  <!-- 차트 -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+
+  <style>
+    .box{
+      display: flex;
+      height: 150px;
+      width: 220px;
+      justify-content: center;
+      align-items: center;
+      border: solid 1px gray;
+      font-size:xx-large;
+      font-weight: bold;
+    }
+
+    #notiCard{
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+
+
+      padding: 5px;
+      font-size: small;
+      text-align: left;
+    }
+    .card-body{
+      padding: 10px;
+    }
+    .card-header{
+      padding: 5px;
+    }
+
+    #notiTable{
+      width: 300px;
+    }
+  </style>
+
+<script>
+  let ae_resource;
+  let name;
+
+  $(document).ready(function () {
+    if(localStorage.getItem('list_item')){
+      ae_resource = localStorage.getItem('list_item');
+      name = localStorage.getItem('list_item2');
+
+      $('#worker').text(name+' ('+ae_resource+')');
+
+      getBioData();
+      startGetBioData();
+
+      // 온도 그래프 그림
+      drawTempChart(ae_resource);
+
+      // 습도 그래프 그림
+      drawHumiChart(ae_resource);
+
+      // 메탄가스 그래프 그림
+      drawMethChart(ae_resource);
+
+      // 일산화탄소 그래프 그림
+      drawCmonChart(ae_resource);
+    }
+  });
+
+  startGetBioData = function() {
+    playAlert = setInterval(function() {
+      getBioData();
+    }, 5000);
+  };
+
+  function getBioData(){
+    // biogrp 조회
+    selectGrpAsync(ae_resource, 'biogrp').then((res) => {
+        if (res.statusText == 'OK') {
+
+          let loc = heart = danger = '';
+
+          res.json().then(data => {
+            try{
+              loc = data['m2m:agr']['m2m:rsp'][0]['pc']['m2m:cin']['con'];
+              $("#box1").text(loc);
+
+            }catch{
+              console.log("biogrp > loc catch!");
+              $("#box1").text('');
+              $("#box1").append('<i class="fas fa-exclamation-triangle"></i>');
+            }
+
+            try{
+              heart = data['m2m:agr']['m2m:rsp'][1]['pc']['m2m:cin']['con'];
+              if ($("#box2").text() != heart){
+                if(heart  < 65){
+                  $('#td1').text("Worker heart rate is dangerous.");
+                }
+                else{
+                  $('#td1').text('');
+                }
+              }
+              $("#box2").text(heart);
+            }catch{
+              console.log("biogrp > heart catch!");
+              $("#box2").text('');
+              $("#box2").append('<i class="fas fa-exclamation-triangle"></i>');
+              $('#td1').text('');
+            }
+
+            try{
+              danger = data['m2m:agr']['m2m:rsp'][2]['pc']['m2m:cin']['con'];
+              console.log("danger?");
+              console.log(danger);
+              if(danger == '0'){
+                $("#box3").text("NORMAL");
+                $("#box3").css("color","green");
+                $('#td2').text('');
+              }
+              else{
+                if($("#box3").text() != "FALL DOWN"){
+                  $('#td2').text("A fall of the worker has been detected.");
+                }
+                $("#box3").text("FALL DOWN");
+                $("#box3").css("color","red");
+              }
+            }catch{
+              console.log("biogrp > heart catch!");
+              $("#box3").text('');
+              $("#box3").append('<i class="fas fa-exclamation-triangle"></i>');
+              $('#td2').text('');
+            }
+
+            checkNoti();
+          });
+        }
+        else {
+          alert('ERROR');
+          console.error(res);
+        }
+      }).catch(err => console.error(err));
+  }
+
+  // 알림 버튼 클릭 이벤트
+  function clickAlertPage(){
+    localStorage.setItem('list_item', ae_resource);
+    location.href='alert.html';
+  }
+
+  function closeNoti(){
+    $('#td1').text('');
+    $('#td2').text('');
+    $('#td3').text('');
+    $('#td4').text('');
+    $('#td5').text('');
+    $('#td6').text('');
+    $('#notiCard').hide();
+  }
+
+  function openNoti(){
+    $('#notiCard').show();
+  }
+
+  function checkNoti(){
+    if($('#td1').text() == '' && $('#td2').text() == '' && $('#td3').text() == '' && $('#td4').text() == '' && $('#td5').text() == '' && $('#td6').text() == ''){
+      $('#notiCard').hide();
+    }
+    else{
+      $('#notiCard').show();
+    }
+  }
+  </script>
+
+</head>
+
+<body id="page-top">
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand js-scroll-trigger" href="index.html">Home</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="registration.html">Worker Registration</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="users.html">Worker Inquire</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="zone-monitoring.html">Zone Moniroting</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+<div class="container">
+
+  <section>
+    <div id="container_demo">
+      <a class="hiddenanchor" id="toadmin_users"></a>
+
+      <div id="wrapper2">
+
+        <div id="login" class="animate form">
+
+          <form>
+            <h1>Monitoring</h1>
+            <div>
+              <h2 id="worker">  </h2>
+            </div>
+              <br>
+              <div>
+                <table border="0" align="center">
+
+                  <tr align="left" style="width: 100%;">
+                    <th style="width: 30%; padding-right: 10px;"> <b>Location</b> </th>
+                    <th style="width: 30%; padding-right: 10px"> <b>Heart Rate</b> </th>
+                    <th style="width: 30%;"> <b>Fall Down</b> </th>
+                  </tr>
+
+                  <tr align="left" style="width: 100%;">
+                    <td> <div class="box" id="box1"></div> </td>
+                    <td> <div class="box" id="box2"></div> </td>
+                    <td> <div class="box" id="box3"></div> </td>
+                  </tr>
+                </table>
+            </div>
+              <br>
+              <br>
+
+
+            <!--온도 그래프-->
+            <div class="chart-container" style="position: relative; height:300px; width:100%;">
+              <canvas id="tempChart"></canvas>
+            </div>
+            <br>
+
+            <!--습도 그래프-->
+            <div class="chart-container" style="position: relative; height:300px; width:100%;">
+              <canvas id="humiChart"></canvas>
+            </div>
+            <br>
+
+            <!--메탄가스 그래프-->
+            <div class="chart-container" style="position: relative; height:300px; width:100%;">
+              <canvas id="methChart"></canvas>
+            </div>
+            <br>
+
+            <!--일산화탄소 그래프-->
+            <div class="chart-container" style="position: relative; height:300px; width:100%;">
+              <canvas id="cmonChart"></canvas>
+            </div>
+            <br>
+
+            <br><br>
+
+            <p class="change_link2">
+
+              <a href="users.html">Back</a>
+
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="card" id="notiCard">
+    <div class="card-header">
+					<button type="button" class="close" onclick="closeNoti()">
+						<span aria-hidden="true">&times;</span>
+					</button>
+    </div>
+    <div class="card-body">
+      <table id="notiTable">
+        <tbody>
+          <tr>
+            <td id="td1"></td>
+          </tr>
+          <tr>
+            <td id="td2"></td>
+          </tr>
+          <tr>
+            <td id="td3"></td>
+          </tr>
+          <tr>
+            <td id="td4"></td>
+          </tr>
+          <tr>
+            <td id="td5"></td>
+          </tr>
+          <tr>
+            <td id="td6"></td>
+          </tr>
+          <tr style="text-align: right;">
+            <td><button type='button' class='btn btn-primary btn-sm' onclick='clickAlert()'>알림</button></td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+</div>
+
+
+<script>
+  function clickAlert(){
+    $('#td1').text('');
+    $('#td2').text('');
+    $('#td3').text('');
+    $('#td4').text('');
+    $('#td5').text('');
+    $('#td6').text('');
+    $('#notiCard').hide();
+    createCin(ae_resource, 'buzzer', 'ON');
+  }
+</script>
+
+
+<!-- 온도 그래프 관련 스크립트 -->
+<script>
+
+  startCheckTempChart = function() {
+		playAlert = setInterval(function() {
+			checkTempChart(ae_resource);
+		}, 5000);
+	};
+
+  let tempConfig;
+  let tempCtx;
+	let tempChart;
+
+  let lastTemp = 0;
+
+  function drawTempChart(ae_resource){
+
+    selectCinAsync(ae_resource, 'temperature').then((res) => {
+      if (res.statusText == 'OK') {
+      res.json().then(data => {
+
+        let list = data['m2m:rsp']['m2m:cin'];
+        lastTemp = list[0]['ct'];   // 온도 데이터 마지막 timestamp 값 저장
+
+        let timeArr = [];
+        let conArr = [];
+
+        // 주의) 모비우스에 새로운 데이터가 앞에서부터 추가됨.
+        let lastIdx = list.length > 15 ? 16 : list.length;
+        for(let i=0; i<lastIdx; i++){
+          let date = list[i]['ct'].substr(2,2)+'-'+list[i]['ct'].substr(4,2)+'-'+list[i]['ct'].substr(6,2)+' '+list[i]['ct'].substr(9,2)+':'+list[i]['ct'].substr(11,2)+':'+list[i]['ct'].substr(13,2);
+
+          // 최신데이터가 앞에있어서 배열에 앞에서부터 추가하면 제대로 정렬됨
+          timeArr.unshift(date);
+          conArr.unshift(list[i]['con']);
+        }
+
+        tempCtx = document.getElementById('tempChart');
+
+        tempConfig = {
+          type: 'line',
+          data: {
+            labels: timeArr,
+            datasets: [{
+              label: 'temp',
+              backgroundColor: 'rgba(255, 99, 132, 1)',
+              borderColor: 'rgba(255, 99, 132, 0.8)',
+              fill: false,
+              data: conArr,
+            }]
+          },
+          options: {
+            maintainAspectRatio: false,
+            legend: {
+        	    display: false
+            },
+            title: {
+              display : true, text: 'Temp Graph'
+            },
+            scales: {
+              yAxes: [{
+                scaleLabel: {
+                  display: true,
+                  labelString: 'Temp'
+                }
+              }]
+            },
+          }
+        };
+
+        //차트 그리기
+        tempChart = new Chart(tempCtx, tempConfig);
+
+        startCheckTempChart();
+
+      });
+      }
+    }).catch(err => console.error(err));
+  }
+
+  // 데이터 select해서 그래프에 그려지지 않은 데이터 있으면 추가
+  function checkTempChart(ae_resource){
+    selectCinAsync(ae_resource, 'temperature').then((res) => {
+      if (res.statusText == 'OK') {
+        res.json().then(data => {
+
+          let list = data['m2m:rsp']['m2m:cin'];
+
+          if(list[0]['ct'] != lastTemp){
+            lastTemp = list[0]['ct'];
+            let date = list[0]['ct'].substr(2,2)+'-'+list[0]['ct'].substr(4,2)+'-'+list[0]['ct'].substr(6,2)+' '+list[0]['ct'].substr(9,2)+':'+list[0]['ct'].substr(11,2)+':'+list[0]['ct'].substr(13,2);
+            insertTempChart(tempConfig, date, list[0]['con']);
+
+            if(list[0]['con'] > 49){
+              $('#td3').text("Worker temperature is dangerous.");
+              checkNoti();
+            }
+            else{
+              $('#td3').text('');
+              checkNoti();
+            }
+          }
+
+        });
+      }
+    }).catch(err => console.error(err));
+  }
+
+  function insertTempChart(tempConfig, label, data){
+
+    tempConfig.data.labels.push(label);
+    var dataset = tempConfig.data.datasets;
+    dataset[0].data.push(data);
+
+    // x축 15개 고정하기 위함
+    if(tempConfig.data.labels.length > 15){
+      tempConfig.data.labels.shift();
+      dataset[0].data.shift();
+    }
+
+    tempChart.update();	//차트 업데이트
+  }
+
+
+</script>
+
+
+
+<!-- 습도 그래프 관련 스크립트 -->
+<script>
+
+  startCheckHumiChart = function() {
+		playAlert = setInterval(function() {
+			checkHumiChart(ae_resource);
+		}, 5000);
+	};
+
+  let humiConfig;
+  let humiCtx;
+	let humiChart;
+
+  let lastHumi = 0;
+
+  function drawHumiChart(ae_resource){
+    selectCinAsync(ae_resource, 'humidity').then((res) => {
+      if (res.statusText == 'OK') {
+      res.json().then(data => {
+
+        let list = data['m2m:rsp']['m2m:cin'];
+        lastHumi = list[0]['ct'];   // 습도 데이터 마지막 timestamp 값 저장
+
+        let timeArr = [];
+        let conArr = [];
+
+        // 주의) 모비우스에 새로운 데이터가 앞에서부터 추가됨.
+        let lastIdx = list.length > 15 ? 16 : list.length;
+        for(let i=0; i<lastIdx; i++){
+          let date = list[i]['ct'].substr(2,2)+'-'+list[i]['ct'].substr(4,2)+'-'+list[i]['ct'].substr(6,2)+' '+list[i]['ct'].substr(9,2)+':'+list[i]['ct'].substr(11,2)+':'+list[i]['ct'].substr(13,2);
+
+          // 최신데이터가 앞에있어서 배열에 앞에서부터 추가하면 제대로 정렬됨
+          timeArr.unshift(date);
+          conArr.unshift(list[i]['con']);
+        }
+
+        humiCtx = document.getElementById('humiChart');
+
+        humiConfig = {
+          type: 'line',
+          data: {
+            labels: timeArr,
+            datasets: [{
+              label: 'humi',
+              backgroundColor: 'rgba(54, 162, 235, 1)',
+              borderColor: 'rgba(54, 162, 235, 0.8)',
+              fill: false,
+              data: conArr,
+            }]
+          },
+          options: {
+            maintainAspectRatio: false,
+            legend: {
+        	    display: false
+            },
+            title: {
+              display : true, text: 'Humidity Graph'
+            },
+            scales: {
+              yAxes: [{
+                scaleLabel: {
+                  display: true,
+                  labelString: 'Humidity'
+                }
+              }]
+            },
+          }
+        };
+
+        //차트 그리기
+        humiChart = new Chart(humiCtx, humiConfig);
+
+        startCheckHumiChart();
+
+      });
+      }
+    }).catch(err => console.error(err));
+  }
+
+  // 데이터 select해서 그래프에 그려지지 않은 데이터 있으면 추가
+  function checkHumiChart(ae_resource){
+    selectCinAsync(ae_resource, 'humidity').then((res) => {
+      if (res.statusText == 'OK') {
+        res.json().then(data => {
+
+          let list = data['m2m:rsp']['m2m:cin'];
+
+          if(list[0]['ct'] != lastHumi){
+            lastHumi = list[0]['ct'];
+            let date = list[0]['ct'].substr(2,2)+'-'+list[0]['ct'].substr(4,2)+'-'+list[0]['ct'].substr(6,2)+' '+list[0]['ct'].substr(9,2)+':'+list[0]['ct'].substr(11,2)+':'+list[0]['ct'].substr(13,2);
+            insertHumiChart(humiConfig, date, list[0]['con']);
+
+            if(list[0]['con'] > 69){
+              $('#td4').text("Worker humidity is dangerous.");
+              checkNoti();
+            }
+            else{
+              $('#td4').text('');
+              checkNoti();
+            }
+          }
+
+        });
+      }
+    }).catch(err => console.error(err));
+  }
+
+  function insertHumiChart(humiConfig, label, data){
+
+    humiConfig.data.labels.push(label);
+    var dataset = humiConfig.data.datasets;
+    dataset[0].data.push(data);
+
+    // x축 15개 고정하기 위함
+    if(humiConfig.data.labels.length > 15){
+      humiConfig.data.labels.shift();
+      dataset[0].data.shift();
+    }
+
+    humiChart.update();	//차트 업데이트
+  }
+
+</script>
+
+
+<!-- 메탄가스 그래프 관련 스크립트 -->
+<script>
+
+  startCheckMethChart = function() {
+		playAlert = setInterval(function() {
+			checkMethChart(ae_resource);
+		}, 5000);
+	};
+
+  let methConfig;
+  let methCtx;
+	let methChart;
+
+  let lastMeth = 0;
+
+  function drawMethChart(ae_resource){
+    selectCinAsync(ae_resource, 'methane').then((res) => {
+      if (res.statusText == 'OK') {
+      res.json().then(data => {
+
+        let list = data['m2m:rsp']['m2m:cin'];
+        lastMeth = list[0]['ct'];
+
+        let timeArr = [];
+        let conArr = [];
+
+        // 주의) 모비우스에 새로운 데이터가 앞에서부터 추가됨.
+        let lastIdx = list.length > 15 ? 16 : list.length;
+        for(let i=0; i<lastIdx; i++){
+          let date = list[i]['ct'].substr(2,2)+'-'+list[i]['ct'].substr(4,2)+'-'+list[i]['ct'].substr(6,2)+' '+list[i]['ct'].substr(9,2)+':'+list[i]['ct'].substr(11,2)+':'+list[i]['ct'].substr(13,2);
+
+          // 최신데이터가 앞에있어서 배열에 앞에서부터 추가하면 제대로 정렬됨
+          timeArr.unshift(date);
+          conArr.unshift(list[i]['con']);
+        }
+
+        methCtx = document.getElementById('methChart');
+
+        methConfig = {
+          type: 'line',
+          data: {
+            labels: timeArr,
+            datasets: [{
+              label: 'meth',
+              backgroundColor: 'rgba(255, 206, 86, 1)',
+              borderColor: 'rgba(255, 206, 86, 0.8)',
+              fill: false,
+              data: conArr,
+            }]
+          },
+          options: {
+            maintainAspectRatio: false,
+            legend: {
+        	    display: false
+            },
+            title: {
+              display : true, text: 'Methane Graph'
+            },
+            scales: {
+              yAxes: [{
+                scaleLabel: {
+                  display: true,
+                  labelString: 'Methane gas'
+                }
+              }]
+            },
+          }
+        };
+
+        //차트 그리기
+        methChart = new Chart(methCtx, methConfig);
+
+        startCheckMethChart();
+
+      });
+      }
+    }).catch(err => console.error(err));
+  }
+
+  // 데이터 select해서 그래프에 그려지지 않은 데이터 있으면 추가
+  function checkMethChart(ae_resource){
+    selectCinAsync(ae_resource, 'methane').then((res) => {
+      if (res.statusText == 'OK') {
+        res.json().then(data => {
+
+          let list = data['m2m:rsp']['m2m:cin'];
+
+          if(list[0]['ct'] != lastMeth){
+            lastMeth = list[0]['ct'];
+            let date = list[0]['ct'].substr(2,2)+'-'+list[0]['ct'].substr(4,2)+'-'+list[0]['ct'].substr(6,2)+' '+list[0]['ct'].substr(9,2)+':'+list[0]['ct'].substr(11,2)+':'+list[0]['ct'].substr(13,2);
+            insertMethChart(methConfig, date, list[0]['con']);
+
+            if(list[0]['con'] > 49){
+              $('#td5').text("Worker mehtane gas is dangerous.");
+              checkNoti();
+            }
+            else{
+              $('#td5').text('');
+              checkNoti();
+            }
+          }
+
+        });
+      }
+    }).catch(err => console.error(err));
+  }
+
+  function insertMethChart(methConfig, label, data){
+
+    methConfig.data.labels.push(label);
+    var dataset = methConfig.data.datasets;
+    dataset[0].data.push(data);
+
+    // x축 15개 고정하기 위함
+    if(methConfig.data.labels.length > 15){
+      methConfig.data.labels.shift();
+      dataset[0].data.shift();
+    }
+
+    methChart.update();	//차트 업데이트
+  }
+</script>
+
+
+<!-- 일산화탄소 그래프 관련 스크립트 -->
+<script>
+
+  startCheckCmonChart = function() {
+		playAlert = setInterval(function() {
+			checkCmonChart(ae_resource);
+		}, 5000);
+	};
+
+  let cmonConfig;
+  let cmonCtx;
+	let cmonChart;
+
+  let lastCmon = 0;
+
+  function drawCmonChart(ae_resource){
+
+    selectCinAsync(ae_resource, 'cmonoxide').then((res) => {
+      if (res.statusText == 'OK') {
+      res.json().then(data => {
+
+        let list = data['m2m:rsp']['m2m:cin'];
+        lastCmon = list[0]['ct'];
+
+        let timeArr = [];
+        let conArr = [];
+
+        // 주의) 모비우스에 새로운 데이터가 앞에서부터 추가됨.
+        let lastIdx = list.length > 15 ? 16 : list.length;
+        for(let i=0; i<lastIdx; i++){
+          let date = list[i]['ct'].substr(2,2)+'-'+list[i]['ct'].substr(4,2)+'-'+list[i]['ct'].substr(6,2)+' '+list[i]['ct'].substr(9,2)+':'+list[i]['ct'].substr(11,2)+':'+list[i]['ct'].substr(13,2);
+
+          // 최신데이터가 앞에있어서 배열에 앞에서부터 추가하면 제대로 정렬됨
+          timeArr.unshift(date);
+          conArr.unshift(list[i]['con']);
+        }
+
+        cmonCtx = document.getElementById('cmonChart');
+
+        cmonConfig = {
+          type: 'line',
+          data: {
+            labels: timeArr,
+            datasets: [{
+              label: 'cmon',
+              backgroundColor: 'rgba(75, 192, 192, 1)',
+              borderColor: 'rgba(75, 192, 192, 0.8)',
+              fill: false,
+              data: conArr,
+            }]
+          },
+          options: {
+            maintainAspectRatio: false,
+            legend: {
+        	    display: false
+            },
+            title: {
+              display : true, text: 'Cmonoxide Graph'
+            },
+            scales: {
+              yAxes: [{
+                scaleLabel: {
+                  display: true,
+                  labelString: 'Cmonoxide'
+                }
+              }]
+            },
+          }
+        };
+
+        //차트 그리기
+        cmonChart = new Chart(cmonCtx, cmonConfig);
+
+        startCheckCmonChart();
+
+      });
+      }
+    }).catch(err => console.error(err));
+  }
+
+  // 데이터 select해서 그래프에 그려지지 않은 데이터 있으면 추가
+  function checkCmonChart(ae_resource){
+    selectCinAsync(ae_resource, 'cmonoxide').then((res) => {
+      if (res.statusText == 'OK') {
+        res.json().then(data => {
+
+          let list = data['m2m:rsp']['m2m:cin'];
+
+          if(list[0]['ct'] != lastCmon){
+            lastCmon = list[0]['ct'];
+            let date = list[0]['ct'].substr(2,2)+'-'+list[0]['ct'].substr(4,2)+'-'+list[0]['ct'].substr(6,2)+' '+list[0]['ct'].substr(9,2)+':'+list[0]['ct'].substr(11,2)+':'+list[0]['ct'].substr(13,2);
+            insertCmonChart(cmonConfig, date, list[0]['con']);
+
+            if(list[0]['con'] > 49){
+              $('#td6').text("Worker cmonoxide is dangerous..");
+              checkNoti();
+            }
+            else{
+              $('#td6').text('');
+              checkNoti();
+            }
+          }
+
+        });
+      }
+    }).catch(err => console.error(err));
+  }
+
+  function insertCmonChart(cmonConfig, label, data){
+
+    cmonConfig.data.labels.push(label);
+    var dataset = cmonConfig.data.datasets;
+    dataset[0].data.push(data);
+
+    // x축 15개 고정하기 위함
+    if(cmonConfig.data.labels.length > 15){
+      cmonConfig.data.labels.shift();
+      dataset[0].data.shift();
+    }
+
+    cmonChart.update();	//차트 업데이트
+  }
+</script>
+
+
+
+</body>
+
+<!-- Bootstrap core JavaScript -->
+<script src="vendor/jquery/jquery.min.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Plugin JavaScript -->
+<script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+<script src="vendor/scrollreveal/scrollreveal.min.js"></script>
+<script src="vendor/magnific-popup/jquery.magnific-popup.min.js"></script>
+
+<!-- Custom scripts for this template -->
+<script src="js/creative.min.js"></script>
+
+</body>
+
+</html>
