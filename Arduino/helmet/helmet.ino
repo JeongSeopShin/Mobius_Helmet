@@ -1,5 +1,6 @@
 #include <Arduino_LSM6DS3.h>
 
+
 #include "DHT.h"
 #define DHTPIN A6     // Digital pin connected to the DHT sensor
 #define DHTTYPE DHT11   // DHT 11
